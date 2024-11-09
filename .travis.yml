@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - 14
+
+services:
+  - docker
+
+env:
+  - IMAGE_VERSION=v3
+
+# Pre-testing installs
+before_script: []
+
+script:
+  - docker --version # print the version for logging
+  - docker build -t udagram-api-feed ./udagram-api-feed
+  - docker tag udagram-api-feed lacthuyit/udagram-api-feed:$IMAGE_VERSION
+
+  - docker build -t udagram-api-user ./udagram-api-user
+  - docker tag udagram-api-user lacthuyit/udagram-api-user:$IMAGE_VERSION
+
+  - docker build -t udagram-frontend ./udagram-frontend
+  - docker tag udagram-frontend lacthuyit/udagram-frontend:$IMAGE_VERSION
+
+  - docker build -t reverseproxy ./udagram-reverseproxy
+  - docker tag reverseproxy lacthuyit/reverseproxy:$IMAGE_VERSION
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push lacthuyit/udagram-api-feed:$IMAGE_VERSION
+  - docker push lacthuyit/udagram-api-user:$IMAGE_VERSION
+  - docker push lacthuyit/udagram-frontend:$IMAGE_VERSION
+  - docker push lacthuyit/reverseproxy:$IMAGE_VERSION
